@@ -23,7 +23,7 @@ re:
 	$(COMPOSE) up -d
 
 rm:	
-	sudo rm  -rf /home/adrherna/data
+	sudo rm  -rf /home/frocha/data
 	systemctl stop docker 
 	systemctl start docker
 
