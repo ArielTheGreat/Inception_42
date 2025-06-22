@@ -18,14 +18,11 @@ stop:
 	cd srcs && $(COMPOSE) stop
 
 re:
-	cd srcs
-	$(COMPOSE) down
-	$(COMPOSE) up -d
+	cd srcs && $(COMPOSE) down && $(COMPOSE) up -d
 
 rm:	
-	sudo rm  -rf /home/frocha/data
-	systemctl stop docker 
-	systemctl start docker
+	sudo rm  -rf /home/$(USER)/data
+	systemctl restart docker
 
 ls:
 	docker volume ls 

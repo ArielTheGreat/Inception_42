@@ -71,7 +71,7 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: /home/frocha/data/db
+      device: /home/frocha/data/wp
 
 networks:
   inception:
