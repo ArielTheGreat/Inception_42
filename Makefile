@@ -6,8 +6,10 @@ up:
 	cd srcs && $(COMPOSE) up -d
 
 build:
-	mkdir -p /home/$(USER)/data/db
-	mkdir -p /home/$(USER)/data/wp
+	mkdir -p /home/frocha/data/db
+	mkdir -p /home/frocha/data/wp
+	chown -R frocha:frocha /home/frocha/data
+	chmod -R 755 /home/frocha/data 
 	echo "Directories for MariaDB and Wordpress where created"
 	cd srcs && $(COMPOSE) build
 
@@ -21,7 +23,7 @@ re:
 	cd srcs && $(COMPOSE) down && $(COMPOSE) up -d
 
 rm:	
-	sudo rm  -rf /home/$(USER)/data
+	rm  -rf /home/frocha/data
 	systemctl restart docker
 
 ls:

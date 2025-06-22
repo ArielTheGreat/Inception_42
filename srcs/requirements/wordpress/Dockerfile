@@ -19,8 +19,8 @@ RUN mkdir -p /var/www/html && \
 
 WORKDIR /var/www/html
 
-COPY config/www.conf  /etc/php/7.4/fpm/pool.d/
-COPY config/init.sh /init.sh
+COPY conf/www.conf  /etc/php/7.4/fpm/pool.d/
+COPY conf/init.sh /init.sh
 
 RUN chmod +x /init.sh
 
