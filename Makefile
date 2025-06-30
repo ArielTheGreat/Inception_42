@@ -9,7 +9,7 @@ build:
 	mkdir -p /home/frocha/data/db
 	mkdir -p /home/frocha/data/wp
 	chown -R frocha:frocha /home/frocha/data
-	chmod -R 755 /home/frocha/data 
+	chmod -R 755 /home/frocha/data
 	echo "Directories for MariaDB and Wordpress where created"
 	cd srcs && $(COMPOSE) build
 
@@ -20,18 +20,17 @@ stop:
 	cd srcs && $(COMPOSE) stop
 
 re:
-	cd srcs && $(COMPOSE) down && $(COMPOSE) up -d
+	$(MAKE) down clean build up
 
-rm:	
+rm:
 	rm  -rf /home/frocha/data
 	systemctl restart docker
 
 ls:
-	docker volume ls 
+	docker volume ls
 	docker image ls
 	docker network ls
 	docker ps -a
-	
 
 stat:
 	systemctl status docker
@@ -49,6 +48,7 @@ nginx:
 	docker exec -it nginx bash
 
 clean:
-	docker volume rm $$(docker volume ls -q)
+	cd srcs && $(COMPOSE) down -v --rmi all --remove-orphans
+	systemctl restart docker
 
-.PHONY: all up down re logs wp db clean
+.PHONY: all up down re logs wp db clean build
