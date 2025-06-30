@@ -5,6 +5,7 @@ FROM debian:bullseye
 RUN apt update && apt install -y \
     php-fpm \
     php-mysqli \
+    mariadb-client \
     curl \
     wget \
     && apt-get clean
