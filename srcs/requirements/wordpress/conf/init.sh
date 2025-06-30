@@ -1,51 +1,51 @@
 #!/bin/bash
 set -e
 
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-chmod +x wp-cli.phar
+until mysqladmin ping -h "mariadb" -u "${DB_USER}" -p"${DB_PASS}" --silent; do
+  echo "Waiting for MariaDB..."
+  sleep 2
+done
 
-if [ ! -f wp-config.php ]; then
-  echo "Configuring WordPress..."
+# Create /var/www/html if volume is empty
+if [ ! -d "/var/www/html" ] || [ -z "$(ls -A /var/www/html)" ]; then
+    echo "Initializing WordPress in /var/www/html..."
+    mkdir -p /var/www/html
+    chown -R www-data:www-data /var/www/html
+    chmod -R 755 /var/www/html
+fi
 
-  ./wp-cli.phar core download --allow-root --force
+# Wait for MariaDB (now with mysqladmin available)
+until mysqladmin ping -h "${DB_HOST}" -u "${DB_USER}" -p"${DB_PASS}" --silent; do
+    echo "Waiting for MariaDB..."
+    sleep 2
+done
 
-  ./wp-cli.phar config create \
-    --dbname=${DB_NAME} \
-    --dbuser=${DB_USER} \
-    --dbpass=${DB_PASS} \
-    --dbhost=${DB_HOST} \
-    --allow-root
+# Proceed with WordPress installation
+if [ ! -f /var/www/html/wp-config.php ]; then
+    echo "Installing WordPress..."
+    
+    cd /var/www/html
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
 
-  ./wp-cli.phar core install \
-    --url="https://${DOMAIN_NAME}" \
-    --title="Inception" \
-    --admin_user=${WP_ADMIN_USER} \
-    --admin_password=${WP_ADMIN_PASS} \
-    --admin_email=${WP_ADMIN_EMAIL} \
-    --allow-root
+    ./wp-cli.phar core download --allow-root --force
 
-  ./wp-cli.phar theme install twentytwentyfour --activate --allow-root
+    ./wp-cli.phar config create \
+        --dbname=${DB_NAME} \
+        --dbuser=${DB_USER} \
+        --dbpass=${DB_PASS} \
+        --dbhost=${DB_HOST} \
+        --allow-root
 
-  ./wp-cli.phar option update siteurl "https://${DOMAIN_NAME}" --allow-root
-  ./wp-cli.phar option update home "https://${DOMAIN_NAME}" --allow-root
+    ./wp-cli.phar core install \
+        --url="https://${DOMAIN_NAME}" \
+        --title="${WP_TITLE}" \
+        --admin_user=${WP_ADMIN_USER} \
+        --admin_password=${WP_ADMIN_PASS} \
+        --admin_email=${WP_ADMIN_EMAIL} \
+        --allow-root
 
-  chown -R www-data:www-data /var/www/html/wp-content
-	chmod -R 0777 /var/www/html/wp-content
-
-  ./wp-cli.phar user create \
-    ${WP_USER} ${WP_USER_EMAIL} \
-    --user_pass=${WP_USER_PASS} \
-    --role=subscriber \
-    --allow-root
-
-  chown -R www-data:www-data /var/www/html/wp-content
-  chmod -R 0777 /var/www/html/wp-content
-
-  ./wp-cli.phar config set FS_METHOD direct --allow-root
-
-  echo "WordPress installation complete with default setup."
-else
-  echo "WordPress already configured, skipping installation."
+    # (Rest of your WP configuration...)
 fi
 
 exec php-fpm7.4 -F
